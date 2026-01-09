@@ -5,7 +5,7 @@
         "peierls_distance":1.0,
         "temperature":300,
         "stress":0.1,
-        "mu_n":0.2,
+        "mu_n":0.8,
         "sig_n":0.1,
         "mu_p":0.05,
         "sig_p":0.05,
@@ -22,6 +22,10 @@
         "plot_filename":"dislocation_plots.png",
         "show_plots":false,
         "save_animation":true,
-        "animation_filename":"dislocation_animation.gif"
+        "animation_filename":"dislocation_animation.gif",
+        "return_velocity_data":true,
+        "plot_velocity_data":true,
+        "return_kink_data":true,
+        "plot_kink_data":true
     }
 }

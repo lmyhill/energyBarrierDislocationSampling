@@ -22,7 +22,7 @@ def main():
 
     
 
-    data = simulate_line(
+    data = simulate_line_kmc(
         N=trajectory_settings.get('N_node', 50),
         b=trajectory_settings.get('peierls_distance', 1.0),
         dx=trajectory_settings.get('dx', 1.0),
@@ -79,9 +79,34 @@ def main():
         animation_filename = output_settings.get('animation_filename', 'line_trajectory.gif')
         animation_path = os.path.join(output_dir, animation_filename)
         create_animation(x, y_snapshots, animation_path)
+    
+
+    if output_settings.get('return_velocity_data', False):
+        velocity = return_velocity(data.get('event_times', []), trajectory_settings.get('dx', 1.0))
+        velocity_data = {'velocity': velocity}
+        velocity_path = os.path.join(output_dir, output_settings.get('velocity_filename', 'velocity_data.json'))
+        with open(velocity_path, 'w') as f:
+            json.dump(velocity_data, f)
+
+    if output_settings.get('return_kink_data', False):
+        num_kinks = return_num_kinks(data.get('y_snapshots', []))
+        if isinstance(num_kinks, np.ndarray):
+            num_kinks = num_kinks.tolist()
+        kink_data = {'num_kinks': num_kinks}
+        kink_path = os.path.join(output_dir, output_settings.get('kink_filename', 'kink_data.json'))
+        with open(kink_path, 'w') as f:
+            json.dump(kink_data, f)
+            
+    if output_settings.get('plot_velocity_data', False):
+        fig, ax = plot_velocity(data.get('event_times', []), trajectory_settings.get('dx', 1.0))
+        plt.show()
+        
+    if output_settings.get('plot_kink_data', False):
+        fig, ax = plot_num_kinks(data.get('event_times', []),data.get('y_snapshots', []))
+        plt.show()
+                
+                
     return()
-
-
 
 if __name__ == "__main__":
     main()
