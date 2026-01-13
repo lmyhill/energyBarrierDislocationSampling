@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from matplotlib.collections import LineCollection
 import matplotlib.cm as cm
 from functs import *
+from plottingFuncts import *
 import os
 
 def main():
@@ -34,6 +35,7 @@ def main():
         sig_p=trajectory_settings.get('sig_p', 0.05),
         Gamma_n=trajectory_settings.get('Gamma_n', 0.5),
         Gamma_p=trajectory_settings.get('Gamma_p', 0.1),
+        Omega_p=trajectory_settings.get('Omega_p', 1.0),
         steps=trajectory_settings.get('n_steps', 300)
     )
 
