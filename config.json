@@ -4,13 +4,15 @@
         "dx":1,
         "peierls_distance":1.0,
         "temperature":300,
-        "stress":0.1,
+        "stress":1,
         "mu_n":0.8,
         "sig_n":0.1,
         "mu_p":0.05,
         "sig_p":0.05,
         "Gamma_n":0.1,
         "Gamma_p":0.1,
+        "Omega_n":1.0,
+        "Omega_p":1.0,
         "n_steps":200
 
     },

@@ -36,17 +36,28 @@ def arrhenius_rate(G, T, nu0=1e12):
 # -----------------------------
 def build_events(
     y, Gn, Gp, T, stress, b,
-    Gamma_n, Gamma_p, dx, Omega_p
+    Gamma_n, Gamma_p, dx, Omega_n,Omega_p, 
 ):
     events = []
     N = len(y) - 1
     curv = curvature(y, dx)
 
     # ---- Nucleation ----
+    # Account for forward and backward nucleation at each site with a saddle point energy
+    # Forward nucleation should be biased by stress, subtracting stress*Omega_n from G_eff
+    # Backward nucleation should be biased by stress in the opposite direction, adding stress*Omega_n to G_eff
+
+    # Forward nucleation
     for i in range(N):
-        G_eff = Gn[i] + Gamma_n * np.abs(curv[i])
+        G_eff = Gn[i] + Gamma_n * np.abs(curv[i]) - stress * Omega_n
         rate = arrhenius_rate(G_eff, T)
-        events.append((rate, "nucleate", i))
+        events.append((rate, "nucleate_fwd", i))
+
+    # Backward nucleation
+    for i in range(N):
+        G_eff = Gn[i] + Gamma_n * np.abs(curv[i]) + stress * Omega_n
+        rate = arrhenius_rate(G_eff, T)
+        events.append((rate, "nucleate_bwd", i))
 
 
     # ---- Propagation (front advance) ----
@@ -61,17 +72,42 @@ def build_events(
                 - stress * Omega_p
             )
             rate = arrhenius_rate(G_eff, T)
-            events.append((rate, "prop_r", j))
+            events.append((rate, "prop_r_fwd", j))
 
         # Left-moving front
         if y[jp] > y[j]:
             G_eff = (
                 Gp[j]
                 + Gamma_p * np.abs(curv[j])
+                - stress * Omega_p
+            )
+            rate = arrhenius_rate(G_eff, T)
+            events.append((rate, "prop_l_fwd", j))
+
+
+    # ----- Propagation (back retreat) ----
+    for j in range(N):
+        jp = (j + 1) % N  # periodic neighbor
+
+        # Right-moving back
+        if y[j] < y[jp]:
+            G_eff = (
+                Gp[j]
+                + Gamma_p * np.abs(curv[j])
                 + stress * Omega_p
             )
             rate = arrhenius_rate(G_eff, T)
-            events.append((rate, "prop_l", j))
+            events.append((rate, "prop_r_bwd", j))
+
+        # Left-moving back
+        if y[jp] < y[j]:
+            G_eff = (
+                Gp[j]
+                + Gamma_p * np.abs(curv[j])
+                + stress * Omega_p
+            )
+            rate = arrhenius_rate(G_eff, T)
+            events.append((rate, "prop_l_bwd", j))
 
     return events
 
@@ -85,14 +121,23 @@ def execute_event(event, y, b):
     _, etype, j = event
     N = len(y) - 1
 
-    if etype == "nucleate":
+    if etype == "nucleate_fwd":
         y[j] += b
 
-    elif etype == "prop_r":
+    elif etype == "nucleate_bwd":
+        y[j] -= b
+
+    elif etype == "prop_r_fwd":
         y[(j + 1) % N] += b
 
-    elif etype == "prop_l":
-        y[j] += b
+    elif etype == "prop_l_fwd":
+        y[(j - 1) % N] += b
+
+    elif etype == "prop_r_bwd":
+        y[(j + 1) % N] -= b
+
+    elif etype == "prop_l_bwd":
+        y[(j - 1) % N] -= b
 
     # enforce periodic image
     y[N] = y[0]
@@ -116,6 +161,7 @@ def simulate_line_kmc(
     sig_p=0.05,
     Gamma_n=0.5,
     Gamma_p=0.1,
+    Omega_n=0.5,
     Omega_p=0.5,
     steps=300
 ):
@@ -133,7 +179,7 @@ def simulate_line_kmc(
     for step in range(steps):
         events = build_events(
             y, Gn, Gp, T, stress, b,
-            Gamma_n, Gamma_p, dx, Omega_p
+            Gamma_n, Gamma_p, dx, Omega_n, Omega_p
         )
 
         rates = np.array([ev[0] for ev in events])
