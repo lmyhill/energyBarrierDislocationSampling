@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from matplotlib.collections import LineCollection
 import matplotlib.cm as cm
 from functs import *
+from plottingFuncts import *
 import os
 
 def main():
