@@ -9,8 +9,8 @@
         "sig_n":0.1,
         "mu_p":0.05,
         "sig_p":0.05,
-        "Gamma_n":0.1,
-        "Gamma_p":0.1,
+        "Gamma_n":0.5,
+        "Gamma_p":0.5,
         "Omega_n":1.0,
         "Omega_p":1.0,
         "n_steps":200
@@ -29,5 +29,13 @@
         "plot_velocity_data":true,
         "return_kink_data":true,
         "plot_kink_data":true
+    },
+    "debug_settings":{
+        "output_curvature_animation":true,
+        "curvature_animation_filename":"curvature_animation.gif",
+        "output_deviation_animation":true,
+        "deviation_animation_filename":"deviation_animation.gif",
+        "output_rateCalculation_animation":true,
+        "rateCalculation_animation_filename":"rateCalculation_animation.gif"
     }
 }

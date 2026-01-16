@@ -14,6 +14,7 @@ def main():
 
     trajectory_settings = config['trajectory_settings']
     output_settings = config['output_settings']
+    debug_settings = config.get('debug_settings', {})
 
     # create the output directory if it doesn't exist
 
@@ -107,6 +108,54 @@ def main():
     if output_settings.get('plot_kink_data', False):
         fig, ax = plot_num_kinks(data.get('event_times', []),data.get('y_snapshots', []))
         plt.show()
+        
+    if debug_settings.get('output_curvature_animation', False):
+        print('Generating curvature annotation animation...')
+        curvature_animation_filename = debug_settings.get('curvature_animation_filename', 'curvature_animation.gif')
+        curvature_animation_path = os.path.join(output_dir, curvature_animation_filename)
+        visualize_animation_with_curvature_annotations(
+            x, data.get('y_snapshots', []),
+            filename=curvature_animation_path,
+            interval=100
+        )
+        
+    if debug_settings.get('output_deviation_animation', False):
+        print('Generating deviation annotation animation...')
+        deviation_animation_filename = debug_settings.get('deviation_animation_filename', 'deviation_animation.gif')
+        deviation_animation_path = os.path.join(output_dir, deviation_animation_filename)
+        visualize_animation_with_deviation_annotations(
+            x, data.get('y_snapshots', []),
+            filename=deviation_animation_path,
+            interval=100
+        )
+        
+    if debug_settings.get('output_rateCalculation_animation', False):
+        print('Generating rate calculation annotation animation...')
+        rateCalculation_animation_filename = debug_settings.get('rateCalculation_animation_filename', 'rateCalculation_animation.gif')
+        rateCalculation_animation_path = os.path.join(output_dir, rateCalculation_animation_filename)
+        Gn = np.random.normal(
+            trajectory_settings.get('mu_n', 0.2),
+            trajectory_settings.get('sig_n', 0.1),
+            trajectory_settings.get('N_node', 50) + 1
+        )
+        Gp = np.random.normal(
+            trajectory_settings.get('mu_p', 0.05),
+            trajectory_settings.get('sig_p', 0.05),
+            trajectory_settings.get('N_node', 50)
+        )
+        T = trajectory_settings.get('temperatureT', 300)
+        stress = trajectory_settings.get('stress', 0.1)
+        b = trajectory_settings.get('peierls_distance', 1.0)
+        Gamma_n = trajectory_settings.get('Gamma_n', 0.5)
+        Gamma_p = trajectory_settings.get('Gamma_p', 0.1)
+        dx = trajectory_settings.get('dx', 1.0)
+        Omega_n = trajectory_settings.get('Omega_n', 1.0)
+        Omega_p = trajectory_settings.get('Omega_p', 1.0)
+        y_snapshots = data.get('y_snapshots', [])
+        visualize_animation_with_rateCalculation_annotations(
+            x, y_snapshots, Gn, Gp, T, stress, b, Gamma_n, Gamma_p, dx, Omega_n, Omega_p, filename=rateCalculation_animation_path, interval=100
+        )
+        
                 
                 
     return()
